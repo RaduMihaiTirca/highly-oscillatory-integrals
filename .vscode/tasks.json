@@ -6,7 +6,7 @@
         {
             "type": "shell",
             "label": "Build",
-            "command": "g++ ${file} -std=c++11 -o ${fileBasenameNoExtension}", //-I /usr/include/python3.6m -lpython3.6m -I ${workspaceFolder}/include include/hermite.o include/Faddeeva.o 
+            "command": "g++ ${file} -std=c++11 -I /usr/include/python3.6m -lpython3.6m -I ${workspaceFolder}/include include/hermite.o include/Faddeeva.o -o ${fileBasenameNoExtension}",
             
             "problemMatcher": "$gcc",
             "group": "build"
