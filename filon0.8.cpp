@@ -21,8 +21,8 @@ const double C       = 137.036;
 const double k       = 0.05/C;
 const double tau     = 5*C*(2.*pi/0.05);
 const double A0      = C;
-const double phiMax  = 2*tau;
-const double phiMin  = -2*tau;
+const double phiMax  = 1.5*tau;
+const double phiMin  = -1.5*tau;
       double p       = 0.001;
 
 double *AphiTab(int n, double x[]){
@@ -234,10 +234,12 @@ int main(){
         g[j] = a+ j*h;
     }
     tmp = AphiTab(n, g);
+
+    p = 0.01;
     
     for (int j = 0; j < n; j++){
         tmp[j] *= tmp[j];
-        tmp[j] /= derS(g[j]);
+        tmp[j] = derS(g[j]);
     }
 
     file.open("output/filon0.8/sampleOutput.txt");
