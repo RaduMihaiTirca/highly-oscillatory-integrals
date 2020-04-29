@@ -212,15 +212,22 @@ complex<double> trapezoidalMethod(int n, double a, double b, complex<double> *f(
 
 int main(){
 
-    int n = 1000000;
+    int n = 1111;
     double a = phiMin;
     double b = phiMax;
     ofstream file;
     double *tmp;
     double *g;
+    double *q;
+    q = new double[n];
+
     
     double h = (b-a)/(n);
     
+    q[0] = phiMin;
+
+    
+
     g = new double[n];
     
     for (int j = 0; j < n ; j ++){
@@ -228,13 +235,18 @@ int main(){
     }
     tmp = AphiTab(n, g);
     
+    for (int j = 0; j < n; j++){
+        tmp[j] *= tmp[j];
+        tmp[j] /= derS(g[j]);
+    }
+
     file.open("output/filon0.8/sampleOutput.txt");
 
     vector<double> x(n),y(n); 
     
     for(int j=0; j<n; ++j) {
         x.at(j) = a + h*j;
-        y.at(j) = real(S(x.at(j)));//tmp[j]*tmp[j]*cos(real(S(x.at(j))));
+        y.at(j) = tmp[j];//real(S(x.at(j)));//tmp[j]*tmp[j]*cos(real(S(x.at(j))));
        // y.at(j) = real(S(x.at(j)));//+x.at(j);
     }
     plt::plot(x, y);
