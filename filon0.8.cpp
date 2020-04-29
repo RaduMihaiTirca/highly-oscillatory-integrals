@@ -6,9 +6,13 @@
 # include <cmath>
 # include <complex>
 # include "Faddeeva.hh"
+# include "matplotlibcpp.h"
+
 
 
 using namespace std;
+
+namespace plt = matplotlibcpp;
 
 
 const complex<double> i(0,1);
@@ -17,9 +21,9 @@ const double C       = 137.036;
 const double k       = 0.05/C;
 const double tau     = 5*C*(2.*pi/0.05);
 const double A0      = C;
-const double phiMax  = 1.01*tau;
-const double phiMin  = -1.01*tau;
-      double p       = 0;
+const double phiMax  = 2*tau;
+const double phiMin  = -2*tau;
+      double p       = 0.001;
 
 double *AphiTab(int n, double x[]){
 
@@ -208,20 +212,44 @@ complex<double> trapezoidalMethod(int n, double a, double b, complex<double> *f(
 
 int main(){
 
-    int n = 11111;
-    double a = 0;
-    double b = 1;
+    int n = 1000000;
+    double a = phiMin;
+    double b = phiMax;
     ofstream file;
+    double *tmp;
+    double *g;
     
-    file.open("output/filonRough0.5/sampleOutput.txt");
+    double h = (b-a)/(n);
+    
+    g = new double[n];
+    
+    for (int j = 0; j < n ; j ++){
+        g[j] = a+ j*h;
+    }
+    tmp = AphiTab(n, g);
+    
+    file.open("output/filon0.8/sampleOutput.txt");
 
-  
-    complex<double> filonRes, trapRes;
-    filonRes = filonQuadrature(n, 0, 1, AphiTab, real(S(phiMax)));
-    //n = 1000000;
-    trapRes  = trapezoidalMethod(n, phiMin, phiMax, complexAphiTab);
+    vector<double> x(n),y(n); 
+    
+    for(int j=0; j<n; ++j) {
+        x.at(j) = a + h*j;
+        y.at(j) = real(S(x.at(j)));//tmp[j]*tmp[j]*cos(real(S(x.at(j))));
+       // y.at(j) = real(S(x.at(j)));//+x.at(j);
+    }
+    plt::plot(x, y);
 
-    cout << filonRes << "\n" << trapRes << "  " << (S(phiMax)/derS(phiMin));
+    // complex<double> filonRes, trapRes;
+    // filonRes = filonQuadrature(n, 0, 1, AphiTab, real(S(phiMax)));
+    // //n = 1000000;
+    // trapRes  = trapezoidalMethod(n, phiMin, phiMax, complexAphiTab);
+
+    // cout << filonRes << "\n" << trapRes << "  " << (S(phiMax)/derS(phiMin));
+    
+    
+    
+    
+    
     // complex<double> result = filonRes;
 
     // file << "     I(A^2e^ih(phi))        (I(...)(n))-(I(...)(n-1))      N        P" <<"\n"; 
@@ -246,6 +274,7 @@ int main(){
          
     //     file << setprecision(10) << setfill (' ') << setw(20) <<  "\n" << result <<"                                 " << n << "             " << j;
     // }
+    plt::show();
     file.close();
     return 0;
 
