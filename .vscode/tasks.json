@@ -6,15 +6,14 @@
         {
             "type": "shell",
             "label": "Build",
-            "command": "g++ ${file} -std=c++11 -I /usr/include/python3.6m -lpython3.6m -I ${workspaceFolder}/include include/hermite.o include/Faddeeva.o -o ${fileBasenameNoExtension}",
-            
+            "command": "mkdir -p output/${fileBasenameNoExtension} && g++ ${file} -std=c++11 -I /usr/include/python3.6m -lpython3.6m -I ${workspaceFolder}/include include/Faddeeva.o -o output/${fileBasenameNoExtension}/${fileBasenameNoExtension}",
             "problemMatcher": "$gcc",
             "group": "build"
         },
         {
             "type": "shell",
             "label": "Build & Run",
-            "command": "./${fileBasenameNoExtension}",
+            "command": "./output/${fileBasenameNoExtension}/${fileBasenameNoExtension}",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
