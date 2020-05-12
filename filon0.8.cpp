@@ -17,9 +17,9 @@ const double C       = 137.036;
 const double k       = 0.05/C;
 const double tau     = 5*C*(2.*pi/0.05);
 const double A0      = C;
-const double phiMax  = 1.01*tau;
-const double phiMin  = -1.01*tau;
-      double p       = 0;
+const double phiMax  = 2*tau;
+const double phiMin  = -2*tau;
+      double p       = 0.01;
 
 double *AphiTab(int n, double x[]){
 
@@ -129,7 +129,7 @@ complex<double> filonQuadrature(int n, double a, double b, double *f(int n , dou
 
     x = new double [2*n+1];
 
-    x[0] = phiMin;
+    x[0] = real(S(phiMin));
 
     for (int j = 0; j < 2*n; j++){
         double tmp = x[j];
@@ -180,7 +180,7 @@ complex<double> trapezoidalMethod(int n, double a, double b, complex<double> *f(
   complex<double> *ftab;
 
   hasTab = new complex<double>[n+1];
-  x   = new double[n+1];
+  x   = new double[n+1]; 
 
     for (int j = 0; j <= n; j++)
         x[j] = (double) a + (double) h*j; 
@@ -218,10 +218,10 @@ int main(){
   
     complex<double> filonRes, trapRes;
     filonRes = filonQuadrature(n, 0, 1, AphiTab, real(S(phiMax)));
-    //n = 1000000;
+    n = 100000;
     trapRes  = trapezoidalMethod(n, phiMin, phiMax, complexAphiTab);
 
-    cout << filonRes << "\n" << trapRes << "  " << (S(phiMax)/derS(phiMin));
+    cout << filonRes << "\n" << trapRes << "  " ;//<< (S(phiMax)/derS(phiMin));
     // complex<double> result = filonRes;
 
     // file << "     I(A^2e^ih(phi))        (I(...)(n))-(I(...)(n-1))      N        P" <<"\n"; 
