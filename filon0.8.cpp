@@ -1,166 +1,83 @@
-
-
 # include <iostream>
 # include <iomanip>
-# include <fstream>
 # include <cmath>
 # include <complex>
-# include "Faddeeva.hh"
-
+# include <vector>
+# include "matplotlibcpp.h"
+# include "csvIO.h"
 
 using namespace std;
+namespace plt = matplotlibcpp;
+
+const complex<double> iComplex(0,1);
+const double pi = acos(-1);
 
 
-const complex<double> i(0,1);
-const double pi      = acos(-1);
-const double C       = 137.036;
-const double k       = 0.05/C;
-const double tau     = 5*C*(2.*pi/0.05);
-const double A0      = C;
-const double phiMax  = 2*tau;
-const double phiMin  = -2*tau;
-      double p       = 0.01;
-
-double *AphiTab(int n, double x[]){
-
-  double *fx;
-  
-  fx = new double[n+1];
-  
-  for (int j = 0; j <= n; j++){
-
-    fx[j] = A0 * exp(-((x[j] * x[j]) / (tau * tau))) * sin(k * x[j]);
-
-  }
-  return fx;
-}
-
-complex<double> *complexAphiTab(int n, double x[]){
-
-  complex<double> *fx;
-  
-  fx = new complex<double>[n+1];
-  
-  for (int j = 0; j <= n; j++){
-
-    fx[j] = A0 * exp(-((x[j] * x[j]) / (tau * tau))) * sin(k * x[j]);
-
-  }
-  return fx;
-}
+complex<double> filonQuadrature(int n, double a, double b, complex<double> *f(int n , double x[]), double omega){
 
 
-double derS(double x){
-
-  double tmp = A0 * exp( -1 * ( (x * x) / (tau * tau) ) ) * sin(k * x);
-
-    return (1/(2.*C))*tmp*tmp + p;
-
-}
-
-complex<double> S(double phi){
-  
-  return p * phi + (1/(2*C)) * (1./8.) * exp(-0.5*k*k*tau*tau) * sqrt(pi/2.) *
-          tau * ( -2 + 2 * exp( (k * k * tau * tau ) / 2.) * 
-          (1 + Faddeeva::erf( (sqrt(2)*phi) / tau )) 
-         - i * Faddeeva::erfi( (k * tau * tau - 2.* i * phi) / (sqrt(2)*tau)) 
-         + i * Faddeeva::erfi( (k * tau * tau + 2.* i * phi) / (sqrt(2)*tau)) );
-}
-
-complex<double> *hasPhiTab (int n, double phi[]){
-
-  complex<double> *fx;
-
-  fx = new complex<double>[n];
-
-  for(int j = 0; j < n; j++)
-    fx[j] =  S(phi[j]) ;
-
-  return fx;
-
-}
-
-
-
-complex<double> filonQuadrature(int n, double a, double b, double *f(int n , double x[]), double omega){
-
-
-    double h = (b-a) / (2.*n);
+    double h = (b-a) / (2*n);
     double *x;
-    double *v;
-    double *ftab;
+    complex<double> *ftab;
 
     double theta = omega*h;
     double sint = sin(theta), cost = cos(theta);
     double alpha, beta, gamma;
 
-    if ( 6.0 * fabs ( theta ) <= 1.0 )
-  {
-    alpha = 2.0 * pow ( theta, 3 ) /   45.0 
-          - 2.0 * pow ( theta, 5 ) /  315.0 
-          + 2.0 * pow ( theta, 7 ) / 4725.0;
-  
-    beta =  2.0                    /     3.0 
-          + 2.0 * pow ( theta, 2 ) /    15.0 
-          - 4.0 * pow ( theta, 4 ) /   105.0 
-          + 2.0 * pow ( theta, 6 ) /   567.0 
-          - 4.0 * pow ( theta, 8 ) / 22275.0;
+    if ( 6.0 * fabs ( theta ) <= 1.0 ){
 
-    gamma = 4.0                    /      3.0 
-          - 2.0 * pow ( theta, 2 ) /     15.0 
-          +       pow ( theta, 4 ) /    210.0 
-          -       pow ( theta, 6 ) /  11340.0;
-  }
-  else
-  {
-    alpha = ( pow ( theta, 2 ) + theta * sint * cost 
-      - 2.0 * sint * sint ) / pow ( theta, 3 );
+        alpha = 2.0 * pow ( theta, 3 )   /   45.0 
+              - 2.0 * pow ( theta, 5 )   /  315.0 
+              + 2.0 * pow ( theta, 7 )   / 4725.0;
+    
+        beta  = 2.0                      /     3.0 
+              + 2.0 * pow ( theta, 2 )   /    15.0 
+              - 4.0 * pow ( theta, 4 )   /   105.0 
+              + 2.0 * pow ( theta, 6 )   /   567.0 
+              - 4.0 * pow ( theta, 8 )   / 22275.0;
 
-    beta = ( 2.0 * theta + 2.0 * theta * cost * cost
-      - 4.0 * sint * cost ) / pow ( theta, 3 );
+        gamma = 4.0                      /     3.0 
+              - 2.0 * pow ( theta, 2 )   /    15.0 
+              +       pow ( theta, 4 )   /   210.0 
+              -       pow ( theta, 6 )   / 11340.0;
+    }
+    else{
 
-    gamma = 4.0 * ( sint - theta * cost ) / pow ( theta, 3 );
-   }
+        alpha = ( pow ( theta, 2 ) + theta * sint * cost 
+        - 2.0 * sint * sint ) / pow ( theta, 3 );
 
-    v = new double [2*n+1];
+        beta = ( 2.0 * theta + 2.0 * theta * cost * cost
+        - 4.0 * sint * cost ) / pow ( theta, 3 );
 
-    for (int j = 0; j <= 2*n; j++)
-        v[j] = (double) a + j*h; 
+        gamma = 4.0 * ( sint - theta * cost ) / pow ( theta, 3 );
+    }
 
     x = new double [2*n+1];
 
-    x[0] = real(S(phiMin));
-
-    for (int j = 0; j < 2*n; j++){
-        double tmp = x[j];
-        x[j+1] = tmp + (omega/derS(tmp))*h;
-    }
-    
-    cout << x[0] << " " << x[1] << "  " << h << " " ;
+    for (int j = 0; j <= 2*n; j++)
+        x[j] = (double) a + (double) h*j; 
 
     ftab = f(2*n,x); 
+    
+    //cout << ftab[1] << endl;
 
-    for (int j = 0; j <= 2*n; j++){
-      ftab[j] *= ftab[j];
-      ftab[j] /= derS(x[j]);
-    }
     complex<double> sigma1(0,0);
 
     for (int j = 0; j<=n; j++)
-        sigma1 += ftab[2*j] * exp(i*omega*v[2*j]);
+        sigma1 += ftab[2*j] * exp(iComplex*omega*x[2*j]);
 
     complex<double> sigma2(0,0);
 
     for (int j = 1; j<=n; j++)
-        sigma2 += ftab[2*j-1] * exp(i*omega*v[2*j-1]);
+        sigma2 += ftab[2*j-1] * exp(iComplex*omega*x[2*j-1]);
 
 
 
-    complex<double> result = h * omega * (i * alpha * (ftab[0] - ftab[2*n] * exp(i* omega)) 
+    complex<double> result = h * (iComplex * alpha * (ftab[0] * exp(iComplex*omega*x[0]) - ftab[2*n] * exp(iComplex*omega*x[2*n])) 
                                    
-                                    + beta  * (sigma1 - 0.5 * (ftab[0] + ftab[2*n] * exp(i* omega)))
+                                    + beta  * (sigma1 - 0.5 * (ftab[2*n] * exp(iComplex*omega*x[2*n]) + ftab[0] * exp(iComplex*omega*x[0])))
                                    
-                                    + gamma * sigma2
+                                    + gamma  * sigma2
 
                                   );
 
@@ -171,33 +88,45 @@ complex<double> filonQuadrature(int n, double a, double b, double *f(int n , dou
 
 }
 
-complex<double> trapezoidalMethod(int n, double a, double b, complex<double> *f(int n , double x[])){
+complex<double> *toIntegrate (int n, double x[]){
+  
+  complex<double> *fx;
+  int j;
+
+  fx = new complex<double> [n+1];
+
+  for ( j = 0; j <= n; j++ )
+  {
+    fx[j] = x[j] * x[j] + 3*x[j] + pow(x[j],3);
+  }
+  return fx;
+}
+
+complex<double> trapezoidalMethod(int n, double a, double b, complex<double> *f(int n , double x[]), double omega){
   
       
   double h = (double) (b-a) / n;
   double *x;
-  complex<double> *hasTab;
   complex<double> *ftab;
 
-  hasTab = new complex<double>[n+1];
-  x   = new double[n+1]; 
+ 
+  x = new double [n+1];
 
     for (int j = 0; j <= n; j++)
         x[j] = (double) a + (double) h*j; 
 
     ftab = f(n,x); 
-    hasTab = hasPhiTab(n+1,x) ;
+
                
-     for (int j = 0 ; j < n+1 ; j ++){                              
-        ftab[j] *= ftab[j];
-        ftab[j] *= exp(i*hasTab[j]) ;
-     }
-  complex<double> result(0,0) ;
+     for (int j = 0 ; j < n+1 ; j ++)                              
+        ftab[j] *= exp(iComplex*omega*x[j]) ;
+    
+  complex<double> result = 0;
 
     for (int j = 1; j < n ; j++)
-      result += ftab[j]*h;
+      result += (double) real(ftab[j])*h;
   
-  result += h/2.*(ftab[0] +ftab[n]);
+  result += h/2.*(ftab[0]+ftab[n]);
 
   delete [] ftab;
   delete [] x;
@@ -208,45 +137,66 @@ complex<double> trapezoidalMethod(int n, double a, double b, complex<double> *f(
 
 int main(){
 
-    int n = 11111;
-    double a = 0;
-    double b = 1;
-    ofstream file;
-    
-    file.open("output/filonRough0.5/sampleOutput.txt");
+  int n = 10000;
+  double a = 0;
+  double b = 1000;
+  double omega = 100;
+  double h = (double) (b-a)/n;
+  double *xTab;
+  complex<double> *tab;
 
+  xTab = new double [n+1];
+
+  for(int i = 0; i < n ; i++)
+    xTab[i] = (double) a + i*h;
   
-    complex<double> filonRes, trapRes;
-    filonRes = filonQuadrature(n, 0, 1, AphiTab, real(S(phiMax)));
-    n = 100000;
-    trapRes  = trapezoidalMethod(n, phiMin, phiMax, complexAphiTab);
+  tab = toIntegrate(n,xTab);  
 
-    cout << filonRes << "\n" << trapRes << "  " ;//<< (S(phiMax)/derS(phiMin));
-    // complex<double> result = filonRes;
+  for(int i = 0; i < n; i ++)
+    tab[i] *= exp(iComplex*xTab[i]*omega);
 
-    // file << "     I(A^2e^ih(phi))        (I(...)(n))-(I(...)(n-1))      N        P" <<"\n"; 
-    
-    // n = 111;
+  vector<double> x(n), y(n), z(n);
+  
+  for (int i = 0; i < n; i++){
+    x.at(i) = a + i*h;
+    y.at(i) = real(tab[i]) ; 
+  }
+  vector<pair<string, vector<double>>> toWrite = {{"x",x} , {"y",y}};
+  writeToCsv("data.csv", toWrite);
+  vector<pair<string, vector<double>>> data = readFromCsv("data.csv");
+  plt::plot(data.at(0).second,data.at(1).second);
+  plt::show();
 
-    // for (int j = n; j <= 1111 ; j += 20){
-    
-    //     complex<double> tmp = result;
-        
-    //     result = filonQuadrature(j, a, b, AphiTab, real(S(phiMax)));
-    //     double absDiff = abs(abs(result)-abs(tmp)); 
-    //     file << setprecision(10) << setfill (' ') << setw(20) <<  "\n" << result <<"        " << absDiff << "             " << j;
-    // }
+  complex<double> *toIntegrate(int n, double x[]);
 
-    // n = 1111;
-    // for (int j = 1; j <= 1000 ; j ++){
-    
-    //     complex<double> tmp = result;
-    //     p = j ;
-    //     result = filonQuadrature(n, a, b, AphiTab, real(S(phiMax)));
-         
-    //     file << setprecision(10) << setfill (' ') << setw(20) <<  "\n" << result <<"                                 " << n << "             " << j;
-    // }
-    file.close();
-    return 0;
+  // complex<double> result = (exp(iComplex*a*omega)*(iComplex*omega*cos(a) 
+  //                        + sin(a)) - iComplex*exp(iComplex*b*omega)*(omega*cos(b) 
+  //                        - iComplex*sin(b))) 
+  //                        / (-1 + pow(omega,2)); //filonQuadrature(1111, a, b, toIntegrate, omega);
 
+
+  complex<double> result = (exp(iComplex*a*omega)*(6.0 - omega*(iComplex*2.0 + 3*omega + a*(iComplex*6.0 + omega*(2 + 3*a - iComplex*(3 + a + pow(a,2))*omega)))) 
+                         +  exp(iComplex*b*omega)*(-6.0 + omega*(iComplex*2.0 + 3*omega + b*(iComplex*6.0 + omega*(2 + 3*b - iComplex*(3 + b + pow(b,2))*omega))))) 
+                         /  pow(omega,4);
+
+  complex<double> result2 = trapezoidalMethod(100, a, b, toIntegrate, omega);
+  cout << setw(24) << real(result) << endl;
+  cout << setw(24) << real(result2);
+
+  // for(int i = 0; i < 2; i ++)
+  //   tab[i] = trapezoidalMethod(pow(10,i), a, b, toIntegrate, omega);
+
+  // for (int i = 1; i < 2; i++){
+  //   x.at(i) = pow(10,i);
+  //   y.at(i) = fabs(real(tab[i] - result)/real(result))*100 ;
+  //   z.at(i) = fabs(real(filonQuadrature(pow(10,i)+1, a, b, toIntegrate, omega)-result)/real(result))*100;
+  // }
+  // plt::loglog(x,y);
+  // plt::loglog(x,z);
+  // plt::show();
+
+
+
+
+ return 0 ;
 }

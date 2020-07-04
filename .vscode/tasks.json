@@ -6,7 +6,7 @@
         {
             "type": "shell",
             "label": "Build",
-            "command": "mkdir -p output/${fileBasenameNoExtension} && g++ ${file} -std=c++11 -I /usr/include/python3.6m -lpython3.6m -I ${workspaceFolder}/include include/Faddeeva.o -o output/${fileBasenameNoExtension}/${fileBasenameNoExtension}",
+            "command": "mkdir -p output/${fileBasenameNoExtension} && g++ ${file} -std=c++11 -I /usr/include/python3.6m -lpython3.6m -I ${workspaceFolder}/include include/Faddeeva.o include/csvIO.o -o output/${fileBasenameNoExtension}/${fileBasenameNoExtension}",
             "problemMatcher": "$gcc",
             "group": "build"
         },
