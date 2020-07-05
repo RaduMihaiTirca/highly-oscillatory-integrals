@@ -145,7 +145,7 @@ complex<double> *toIntegrateCos (int n, double x[]){
   for ( j = 0; j <= n; j++ ){
     fx[j] = cos(x[j]);
   }
-  
+
   return fx;
 }
 
@@ -181,6 +181,7 @@ int main(){
   
   vector<pair<string, vector<double>>> toWrite = {{"x",x} , {"y",y}, {"z",z}};
   writeToCsv("output/relErrorCosOmega10.csv", toWrite);
+  writeToCsv("/home/minastirith/Desktop/Licenta/latex/c4/relErrorCosOmega10.csv", toWrite);
 
   for (int i = 0; i < n; i++){
     complex<double> trap = trapezoidalMethod(pow(10,i), a, b, toIntegratePoly, omega);
@@ -192,6 +193,8 @@ int main(){
   
   toWrite = {{"x",x} , {"y",y}, {"z",z}};
   writeToCsv("output/relErrorPolyOmega10.csv", toWrite);
+  writeToCsv("/home/minastirith/Desktop/Licenta/latex/c4/relErrorPolyOmega10.csv", toWrite);
+  
 
   omega = 1000;
 
@@ -214,6 +217,8 @@ int main(){
 
   toWrite = {{"x",x} , {"y",y}, {"z",z}};
   writeToCsv("output/relErrorCosOmega1000.csv", toWrite);
+  writeToCsv("/home/minastirith/Desktop/Licenta/latex/c4/relErrorCosOmega1000.csv", toWrite);
+  
 
   for (int i = 0; i < n; i++){
     complex<double> trap = trapezoidalMethod(pow(10,i), a, b, toIntegratePoly, omega);
@@ -225,7 +230,7 @@ int main(){
   
   toWrite = {{"x",x} , {"y",y}, {"z",z}};
   writeToCsv("output/relErrorPolyOmega1000.csv", toWrite);
-
+  writeToCsv("/home/minastirith/Desktop/Licenta/latex/c4/relErrorPolyOmega1000.csv", toWrite);
   
  return 0 ;
 }

@@ -21,21 +21,25 @@ int main()
    plt::loglog(relErrorCosOmega10.at(0).second,relErrorCosOmega10.at(1).second);
    plt::loglog(relErrorCosOmega10.at(0).second,relErrorCosOmega10.at(2).second);
    plt::save("output/relErrorCosOmega10.png");
+   plt::save("/home/minastirith/Desktop/Licenta/latex/c4/relErrorCosOmega10.png");
    plt::show();
    
    plt::loglog(relErrorCosOmega1000.at(0).second,relErrorCosOmega1000.at(1).second);
    plt::loglog(relErrorCosOmega1000.at(0).second,relErrorCosOmega1000.at(2).second);
    plt::save("output/relErrorCosOmega1000.png");
+   plt::save("/home/minastirith/Desktop/Licenta/latex/c4/relErrorCosOmega1000.png");
    plt::show();
 
    plt::loglog(relErrorPolyOmega10.at(0).second,relErrorPolyOmega10.at(1).second);
    plt::loglog(relErrorPolyOmega10.at(0).second,relErrorPolyOmega10.at(2).second);
    plt::save("output/relErrorPolyOmega10.png");
+   plt::save("/home/minastirith/Desktop/Licenta/latex/c4/relErrorPolyOmega10.png");
    plt::show();
 
    plt::loglog(relErrorPolyOmega1000.at(0).second,relErrorPolyOmega1000.at(1).second);
    plt::loglog(relErrorPolyOmega1000.at(0).second,relErrorPolyOmega1000.at(2).second);
    plt::save("output/relErrorPolyOmega1000.png");
+   plt::save("/home/minastirith/Desktop/Licenta/latex/c4/relErrorPolyOmega1000.png");
    plt::show();
    
 
