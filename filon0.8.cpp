@@ -21,7 +21,7 @@ const double phiMax  = 2*tau;
 const double phiMin  = -2*tau;
       double p       = 0.01;
 
-double *AphiTab(int n, double x[]){
+double *AphiTab(int n, double x[]){ //good!
 
   double *fx;
   
@@ -35,7 +35,7 @@ double *AphiTab(int n, double x[]){
   return fx;
 }
 
-complex<double> *complexAphiTab(int n, double x[]){
+complex<double> *complexAphiTab(int n, double x[]){ //good!
 
   complex<double> *fx;
   
@@ -50,7 +50,7 @@ complex<double> *complexAphiTab(int n, double x[]){
 }
 
 
-double derS(double x){
+double derHasPhi(double x){
 
   double tmp = A0 * exp( -1 * ( (x * x) / (tau * tau) ) ) * sin(k * x);
 
@@ -58,7 +58,7 @@ double derS(double x){
 
 }
 
-complex<double> S(double phi){
+complex<double> hasPhi(double phi){ //good!
   
   return p * phi + (1/(2*C)) * (1./8.) * exp(-0.5*k*k*tau*tau) * sqrt(pi/2.) *
           tau * ( -2 + 2 * exp( (k * k * tau * tau ) / 2.) * 
@@ -67,14 +67,14 @@ complex<double> S(double phi){
          + i * Faddeeva::erfi( (k * tau * tau + 2.* i * phi) / (sqrt(2)*tau)) );
 }
 
-complex<double> *hasPhiTab (int n, double phi[]){
+complex<double> *hasPhiTab (int n, double phi[]){ //good!
 
   complex<double> *fx;
 
   fx = new complex<double>[n];
 
   for(int j = 0; j < n; j++)
-    fx[j] =  S(phi[j]) ;
+    fx[j] =  hasPhi(phi[j]) ;
 
   return fx;
 
@@ -129,11 +129,11 @@ complex<double> filonQuadrature(int n, double a, double b, double *f(int n , dou
 
     x = new double [2*n+1];
 
-    x[0] = real(S(phiMin));
+    x[0] = real(hasPhi(phiMin));
 
     for (int j = 0; j < 2*n; j++){
         double tmp = x[j];
-        x[j+1] = tmp + (omega/derS(tmp))*h;
+        x[j+1] = tmp + (omega/derHasPhi(tmp))*h;
     }
     
     cout << x[0] << " " << x[1] << "  " << h << " " ;
@@ -142,7 +142,7 @@ complex<double> filonQuadrature(int n, double a, double b, double *f(int n , dou
 
     for (int j = 0; j <= 2*n; j++){
       ftab[j] *= ftab[j];
-      ftab[j] /= derS(x[j]);
+      ftab[j] /= derHasPhi(x[j]);
     }
     complex<double> sigma1(0,0);
 
@@ -217,7 +217,7 @@ int main(){
 
   
     complex<double> filonRes, trapRes;
-    filonRes = filonQuadrature(n, 0, 1, AphiTab, real(S(phiMax)));
+    filonRes = filonQuadrature(n, 0, 1, AphiTab, real(hasPhi(phiMax)));
     n = 100000;
     trapRes  = trapezoidalMethod(n, phiMin, phiMax, complexAphiTab);
 
