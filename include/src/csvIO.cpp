@@ -4,7 +4,8 @@
 #include <utility> // pair
 #include <stdexcept> // runtime_error
 #include <sstream> // stringstream
-#include "csvIO.h"
+#include <iomanip>
+#include "../csvIO.h"
 
 using namespace std;
 
@@ -31,7 +32,9 @@ void writeToCsv(string filename, vector<pair<string, vector<double>>> dataset){
     {
         for(int j = 0; j < dataset.size(); ++j)
         {
-            myFile << dataset.at(j).second.at(i);
+            myFile.precision(5);
+            myFile << scientific;
+            myFile << (double) dataset.at(j).second.at(i);
             if(j != dataset.size() - 1) myFile << ","; // No comma at end of line
         }
         myFile << "\n";
