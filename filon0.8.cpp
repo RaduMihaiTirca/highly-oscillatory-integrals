@@ -6,7 +6,6 @@
 # include <cmath>
 # include <complex>
 # include <vector>
-# include "Faddeeva.hh"
 
 
 using namespace std;
@@ -14,13 +13,76 @@ using namespace std;
 
 const complex<double> iComplex(0,1);
 const double pi      = acos(-1);
-const double C       = 137.036;
-const double k       = 0.05/C;
-const double tau     = 5*C*(2.*pi/0.05);
-const double A0      = C;
-const double phiMax  = 2*tau;
-const double phiMin  = -2*tau;
-      double p       = 1;
+//const double C       = 137.036;
+//const double k       = 0.05/C;
+//const double tau     = 5*C*(2.*pi/0.05);
+const double omega   = 1;
+const double A0      = 0.5;
+const double phiMax  = 0;
+const double phiMin  = 100;
+      //double p       = 1;
+
+
+double Aphi(double x){
+
+  return pow(x,2)+2*pow(x,4);
+
+}
+double *AphiTab(int n, double x[]){ //good!
+
+  double *fx;
+  
+  fx = new double[n+1];
+  
+  for (int i = 0; i <= n; i++){
+
+    fx[i] = Aphi(x[i]);
+
+  }
+  return fx;
+}
+complex<double> *complexAphiTab(int n, double x[]){ //good!
+
+  complex<double> *fx;
+  
+  fx = new complex<double>[n+1];
+  
+  for (int i = 0; i <= n; i++){
+
+    fx[i] = (0,0) + Aphi(x[i]);
+
+  }
+  return fx;
+}
+
+
+
+
+complex<double> hasPhi(double phi){ //good!
+  
+  return omega*phi+A0*sin(omega*phi);
+}
+
+complex<double> *hasPhiTab (int n, double phi[]){ //good!
+
+  complex<double> *fx;
+
+  fx = new complex<double>[n];
+
+  for(int i = 0; i < n; i++)
+    fx[i] =  hasPhi(phi[i]) ;
+
+  return fx;
+
+}
+
+double derHasPhi(double x){
+
+  //double tmp = A0 * exp( -1 * ( (x * x) / (tau * tau) ) ) * sin(k * x);
+
+    return (0,0) + omega + A0*omega*cos(omega*x);
+
+}
 
 double interpolate( vector<double> &xData, vector<double> &yData, double x, bool extrapolate )
 {
@@ -47,77 +109,12 @@ double interpolate( vector<double> &xData, vector<double> &yData, double x, bool
    return yL + dydx * ( x - xL );                                              // linear interpolation
 }
 
-
-double *AphiTab(int n, double x[]){ //good!
-
-  double *fx;
-  
-  fx = new double[n+1];
-  
-  for (int i = 0; i <= n; i++){
-
-    fx[i] = A0 * exp(-((x[i] * x[i]) / (tau * tau))) * sin(k * x[i]);
-
-  }
-  return fx;
-}
-
-double Aphi(double x){
-
-  return A0 * exp(-((x * x) / (tau * tau))) * sin(k * x);
-
-}
-complex<double> *complexAphiTab(int n, double x[]){ //good!
-
-  complex<double> *fx;
-  
-  fx = new complex<double>[n+1];
-  
-  for (int i = 0; i <= n; i++){
-
-    fx[i] = A0 * exp(-((x[i] * x[i]) / (tau * tau))) * sin(k * x[i]);
-
-  }
-  return fx;
-}
-
-
-double derHasPhi(double x){
-
-  double tmp = A0 * exp( -1 * ( (x * x) / (tau * tau) ) ) * sin(k * x);
-
-    return (1/(2.*C))*tmp*tmp + p;
-
-}
-
-complex<double> hasPhi(double phi){ //good!
-  
-  return p * phi + (1/(2*C)) * (1./8.) * exp(-0.5*k*k*tau*tau) * sqrt(pi/2.) *
-          tau * ( -2 + 2 * exp( (k * k * tau * tau ) / 2.) * 
-          (1 + Faddeeva::erf( (sqrt(2)*phi) / tau )) 
-         - iComplex * Faddeeva::erfi( (k * tau * tau - 2.* iComplex * phi) / (sqrt(2)*tau)) 
-         + iComplex * Faddeeva::erfi( (k * tau * tau + 2.* iComplex * phi) / (sqrt(2)*tau)) );
-}
-
-complex<double> *hasPhiTab (int n, double phi[]){ //good!
-
-  complex<double> *fx;
-
-  fx = new complex<double>[n];
-
-  for(int i = 0; i < n; i++)
-    fx[i] =  hasPhi(phi[i]) ;
-
-  return fx;
-
-}
-
 complex<double> *transVal(int n, double x[]){
   complex<double> *fx;
   
   fx = new complex<double>[n+1];
 
-  double a = phiMin;
+    double a = phiMin;
     double b = phiMax;
     double h = (double) (b-a)/n;
 
@@ -125,7 +122,7 @@ complex<double> *transVal(int n, double x[]){
     double yb=real(hasPhi(b));
     double yh= (double) (yb-ya)/n;
 
-    cout << "lim = " << a << " " << ya << " " << b << " "  << yb << "\n"; 
+    //cout << "lim = " << a << " " << ya << " " << b << " "  << yb << "\n"; 
     
     vector<double> Yt(n+1), Y(n+1), Xy(n+1), X(n+1);
 
@@ -137,9 +134,9 @@ complex<double> *transVal(int n, double x[]){
   }
      //cout << Y.at(0) << " " << Y.at(n) <<"\n";
   for(int i = 0 ; i <= n; i ++){
-    double x = Y.at(i); cout <<" x: " << x << " ";
-    double y = interpolate(X, Yt, x, false); cout << "y: " << y << " ";
-    fx[i]=pow(Aphi(y),2)/derHasPhi(y); cout << "fx: " << fx[i] << "\n";
+    double x = Y.at(i); cout << i <<" x: " << x << " ";
+    double y = interpolate(X, Yt, x, true); cout << "y: " << y << " ";
+    fx[i]=Aphi(y)/derHasPhi(y); cout << "fx: " << fx[i] << "\n";
     //Xy.push_back(y);
     
   }
@@ -292,7 +289,7 @@ complex<double> simpleFilonQuadrature(int n, double a, double b, complex<double>
     ftab = f(2*n,x); 
     
 
-    cout << x[0] << " " << x[2*n] << "\n";
+    //cout << x[0] << " " << x[2*n] << "\n";
 
     //cout << ftab[1] << endl;
 
@@ -358,9 +355,12 @@ complex<double> trapezoidalMethod(int n, double a, double b, complex<double> *f(
 
 }
 
+
+
+
 int main(){
 
-    int n = 1000;
+    int n = 20;
     double a = phiMin;
     double b = phiMax;
   //   double h = (double) (b-a)/n;
@@ -387,7 +387,7 @@ int main(){
   
     complex<double> filonRes, trapRes;
     filonRes = simpleFilonQuadrature(n, ya, yb, transVal, 1);
-    n = 1000000;
+    n = 10000000;
     trapRes  = trapezoidalMethod(n, phiMin, phiMax, complexAphiTab);
 
     cout << filonRes << "\n" << trapRes << "  " ;//<< (S(phiMax)/derS(phiMin));
