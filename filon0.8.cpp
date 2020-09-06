@@ -1,5 +1,4 @@
 
-
 # include <iostream>
 # include <iomanip>
 # include <fstream>
@@ -17,9 +16,9 @@ const double pi      = acos(-1);
 //const double k       = 0.05/C;
 //const double tau     = 5*C*(2.*pi/0.05);
 const double omega   = 1;
-const double A0      = 0.5;
+const double A0      = 0.1;
 const double phiMax  = 0;
-const double phiMin  = 100;
+const double phiMin  = 10;
       //double p       = 1;
 
 
@@ -60,7 +59,7 @@ complex<double> *complexAphiTab(int n, double x[]){ //good!
 
 complex<double> hasPhi(double phi){ //good!
   
-  return omega*phi+A0*sin(omega*phi);
+  return (0,0) + omega*phi+A0*sin(2*omega*phi);
 }
 
 complex<double> *hasPhiTab (int n, double phi[]){ //good!
@@ -80,7 +79,7 @@ double derHasPhi(double x){
 
   //double tmp = A0 * exp( -1 * ( (x * x) / (tau * tau) ) ) * sin(k * x);
 
-    return (0,0) + omega + A0*omega*cos(omega*x);
+    return (0,0) + omega + A0*omega*2*cos(omega*2*x);
 
 }
 
@@ -104,7 +103,7 @@ double interpolate( vector<double> &xData, vector<double> &yData, double x, bool
       if ( x > xR ) yL = yR;
    }
 
-   double dydx = ( yR - yL ) / ( xR - xL );                                    // gradient
+   double dydx = ( yR - yL ) / ( xR - xL );                                    
 
    return yL + dydx * ( x - xL );                                              // linear interpolation
 }
@@ -134,9 +133,10 @@ complex<double> *transVal(int n, double x[]){
   }
      //cout << Y.at(0) << " " << Y.at(n) <<"\n";
   for(int i = 0 ; i <= n; i ++){
-    double x = Y.at(i); cout << i <<" x: " << x << " ";
-    double y = interpolate(X, Yt, x, true); cout << "y: " << y << " ";
-    fx[i]=Aphi(y)/derHasPhi(y); cout << "fx: " << fx[i] << "\n";
+    double val = Y.at(i); //cout << i <<" x: " << x << " ";
+    double y = interpolate(X, Yt, val, true); //cout << "y: " << y << " ";
+    //x[i] =y;
+    fx[i]=Aphi(y)/derHasPhi(y); //cout << "fx: " << fx[i] << "\n";
     //Xy.push_back(y);
     
   }
@@ -271,7 +271,7 @@ complex<double> simpleFilonQuadrature(int n, double a, double b, complex<double>
               -       pow ( theta, 6 )   / 11340.0;
     }
     else{
-
+        cout << "\n yas"; 
         alpha = ( pow ( theta, 2 ) + theta * sint * cost 
         - 2.0 * sint * sint ) / pow ( theta, 3 );
 
@@ -355,12 +355,46 @@ complex<double> trapezoidalMethod(int n, double a, double b, complex<double> *f(
 
 }
 
+complex<double> trapezoidalMethodDebug(int n, double a, double b, complex<double> *f(int n , double x[])){
+  
+      
+  double h = (double) (b-a) / n;
+  double *x;
+  //complex<double> *hasTab;
+  complex<double> *ftab;
+
+  //hasTab = new complex<double>[n+1];
+  x   = new double[n+1]; 
+
+    for (int i = 0; i <= n; i++)
+        x[i] = (double) a + (double) h*i; 
+
+    ftab = f(n,x); 
+    //hasTab = hasPhiTab(n+1,x) ;
+               
+     for (int i = 0 ; i < n+1 ; i ++){                              
+        ftab[i] *= ftab[i]* exp(iComplex*hasPhi(x[i]));
+        //ftab[i] *= exp(iComplex*hasTab[i]) ;
+     }
+  complex<double> result(0,0) ;
+
+    for (int i = 1; i < n ; i++)
+      result += ftab[i]*h;
+  
+  result += h/2.*(ftab[0] +ftab[n]);
+
+  delete [] ftab;
+  delete [] x;
+
+  return result;
+
+}
 
 
 
 int main(){
 
-    int n = 20;
+    int n = 101;
     double a = phiMin;
     double b = phiMax;
   //   double h = (double) (b-a)/n;
@@ -385,12 +419,12 @@ int main(){
 
     
   
-    complex<double> filonRes, trapRes;
+    complex<double> filonRes, trapRes, trapResDebug;
     filonRes = simpleFilonQuadrature(n, ya, yb, transVal, 1);
-    n = 10000000;
+    n = 100000;
     trapRes  = trapezoidalMethod(n, phiMin, phiMax, complexAphiTab);
-
-    cout << filonRes << "\n" << trapRes << "  " ;//<< (S(phiMax)/derS(phiMin));
+    trapResDebug = trapezoidalMethodDebug(n, ya, yb, transVal);
+    cout << filonRes << "\n" << trapRes << "  \n" << trapResDebug ;//<< (S(phiMax)/derS(phiMin));
     // complex<double> result = filonRes;
 
     // file << "     I(A^2e^ih(phi))        (I(...)(n))-(I(...)(n-1))      N        P" <<"\n"; 
